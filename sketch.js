@@ -1,4 +1,3 @@
-// ========================= FUNCTIONS FIRST =========================
 function updateCellSize() {
   cellW = width / COLS;
   cellH = height / ROWS;
@@ -17,7 +16,7 @@ function createEmptyGrid() {
   return grid;
 }
 
-// ========================= CONFIG =========================
+// config
 let layers = [];
 let selectedLayer = 2; // Layer 3 default
 
@@ -25,7 +24,7 @@ let COLS = 6;
 let ROWS = 6;
 let cellW, cellH;
 
-// Dragging
+// sqaure dragging
 let dragging = false;
 let dragStartX = 0;
 let dragStartY = 0;
@@ -35,21 +34,20 @@ let draggedCell = null;
 let snapToGrid = false;
 let snapButton;
 
-// Visibility checkboxes
-let visA, visB, visC;
+let vis_layer1, vis_layer2, vis_layer3;
 
-// Blend mode dropdowns
+// blend mode dropdowns
 let blendA, blendB, blendC;
 let blendModesList = ["BLEND", "ADD", "DARKEST", "LIGHTEST", "DIFFERENCE", "MULTIPLY", "SCREEN", "OVERLAY"];
 
-// Buttons
+// btns
 let resetButton, downloadButton, randomizeButton;
 
-// Background color picker
+// color picker
 let bgColorPicker;
 let bgColor = [220, 220, 220];
 
-// Sliders
+// col and row sliders
 let colsSlider, rowsSlider;
 
 // File inputs
@@ -60,7 +58,7 @@ let canvas;
 // References for layer buttons (so we can outline them)
 let layerBtn1, layerBtn2, layerBtn3;
 
-// ========================= SETUP =========================
+// setup
 function setup() {
   createTitle(); 
   canvas = createCanvas(800, 800);
@@ -75,11 +73,11 @@ function setup() {
   setupUI(canvasX, canvasY);
 }
 
-// ========================= DRAW =========================
+// draw
 function draw() {
   background(bgColor[0], bgColor[1], bgColor[2]);  
 
-  // UPDATE BUTTON OUTLINES
+  // select outlines
   layerBtn1.style("border", selectedLayer === 2 ? "2px solid red" : "1px solid #ccc");
   layerBtn2.style("border", selectedLayer === 1 ? "2px solid red" : "1px solid #ccc");
   layerBtn3.style("border", selectedLayer === 0 ? "2px solid red" : "1px solid #ccc");
@@ -121,7 +119,7 @@ function draw() {
   blendMode(BLEND);
 }
 
-// ========================= UI =========================
+// bottom ui
 function setupUI(canvasX, canvasY) {
   let uiStartY = canvasY + height + 40;
   let colMargin = 30;
@@ -132,7 +130,7 @@ function setupUI(canvasX, canvasY) {
   let col4 = col3 + columnWidth + colMargin;
   let rowSpacing = 35;
 
-  // --- Column 1: Layer buttons, snap, color ---
+  // col1
   layerBtn1 = createButton("Layer 1").position(col1, uiStartY)
     .style('border-radius', '5px')
     .mousePressed(() => selectedLayer = 2);
@@ -159,21 +157,21 @@ function setupUI(canvasX, canvasY) {
       bgColor = [red(c), green(c), blue(c)];
     });
 
-  // --- Column 2 ---
-  visC = createCheckbox("Show Layer 1", false).position(col2, uiStartY);
-  visC.changed(() => layers[2].visible = visC.checked());
+  // col2
+  vis_layer3 = createCheckbox("Show Layer 1", false).position(col2, uiStartY);
+  vis_layer3.changed(() => layers[2].visible = vis_layer3.checked());
 
-  visB = createCheckbox("Show Layer 2", false).position(col2, uiStartY + rowSpacing);
-  visB.changed(() => layers[1].visible = visB.checked());
+  vis_layer2 = createCheckbox("Show Layer 2", false).position(col2, uiStartY + rowSpacing);
+  vis_layer2.changed(() => layers[1].visible = vis_layer2.checked());
 
-  visA = createCheckbox("Show Layer 3", false).position(col2, uiStartY + rowSpacing * 2);
-  visA.changed(() => layers[0].visible = visA.checked());
+  vis_layer1 = createCheckbox("Show Layer 3", false).position(col2, uiStartY + rowSpacing * 2);
+  vis_layer1.changed(() => layers[0].visible = vis_layer1.checked());
 
   resetButton = createButton("Reset").position(col2, uiStartY + rowSpacing * 3)
     .style('border-radius', '5px')
     .mousePressed(resetAllLayers);
 
-  // --- Column 3 ---
+  // col3
   blendC = createSelect().position(col3, uiStartY);
   blendModesList.forEach(m => blendC.option(m));
   blendC.changed(() => layers[2].blend = eval(blendC.value()));
@@ -208,7 +206,7 @@ function setupUI(canvasX, canvasY) {
     .input(() => { ROWS = rowsSlider.value(); updateCellSize(); });
 }
 
-// ========================= TITLE =========================
+// h1
 function createTitle() {
   let titleDiv = createDiv("Pangram3");
   titleDiv.style("font-family", "Courier");
@@ -218,7 +216,6 @@ function createTitle() {
   titleDiv.size(windowWidth);
 }
 
-// ========================= LAYERS HELPERS =========================
 function initLayers() {
   layers = [
     { img: null, offsets: createEmptyGrid(), visible: false, blend: BLEND },
@@ -233,9 +230,9 @@ function handleUpload(file, layerIndex) {
       img.resize(800, 800);
       layers[layerIndex].img = img;
       layers[layerIndex].visible = true;
-      if (layerIndex === 0) visA.checked(true);
-      if (layerIndex === 1) visB.checked(true);
-      if (layerIndex === 2) visC.checked(true);
+      if (layerIndex === 0) vis_layer1.checked(true);
+      if (layerIndex === 1) vis_layer2.checked(true);
+      if (layerIndex === 2) vis_layer3.checked(true);
     });
   }
 }
@@ -270,7 +267,7 @@ function randomizeLayers() {
   layers = shuffle(layers);
 }
 
-// ========================= MOUSE =========================
+// mouse actions
 function mousePressed() {
   let i = floor(mouseX / cellW);
   let j = floor(mouseY / cellH);
@@ -306,20 +303,20 @@ function mouseReleased() {
   dragging = false;
 }
 
-// ========================= DOWNLOAD =========================
+// download
 function download1080() {
-  let pg = createGraphics(1080, 1080);
-  pg.background(bgColor[0], bgColor[1], bgColor[2]);
+  let download = createGraphics(1080, 1080);
+  download.background(bgColor[0], bgColor[1], bgColor[2]);
 
   let scaleF = 1080 / width;
-  pg.push();
-  pg.scale(scaleF);
+  download.push();
+  download.scale(scaleF);
 
   for (let l = 0; l < layers.length; l++) {
     let layer = layers[l];
     if (!layer.img || !layer.visible) continue;
 
-    pg.blendMode(layer.blend);
+    download.blendMode(layer.blend);
     let img = layer.img;
 
     for (let i = 0; i < COLS; i++) {
@@ -332,16 +329,15 @@ function download1080() {
         let dx = i * cellW + layer.offsets[i][j].x;
         let dy = j * cellH + layer.offsets[i][j].y;
 
-        pg.image(img, dx, dy, cellW, cellH, sx, sy, sw, sh);
+        download.image(img, dx, dy, cellW, cellH, sx, sy, sw, sh);
       }
     }
   }
 
-  pg.pop();
-  save(pg, "myComposition.png");
+  download.pop();
+  save(download, "my-comp.png");
 }
 
-// ========================= WINDOW RESIZE =========================
 function windowResized() {
   let canvasX = (windowWidth - width) / 2;
   canvas.position(canvasX, canvas.y);
